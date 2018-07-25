@@ -21,15 +21,18 @@ router.get("/", function(req, res, next) {
   res.render("landing", { title: "NewsReader" });
 });
 
+const newsfeed = "https://newsapi.org/v2/top-headlines";
+
 router.get("/feed", async function(req, res) {
   const filter = req.query.category;
+  const filterLanguage = req.query.language;
   const urlToFetch = filter
-    ? `https://newsapi.org/v2/top-headlines?category=${filter}`
-    : "https://newsapi.org/v2/top-headlines";
-  const news = await axios
+    ? `${newsfeed}?category=${filter}`
+    :  newsfeed
+    const news = await axios
     .get(urlToFetch, {
       params: {
-        country: "us",
+        language: filterLanguage || "en",
         apiKey: process.env.NEWS_API_KEY
       }
     })
@@ -40,7 +43,8 @@ router.get("/feed", async function(req, res) {
     id: uuid(article.url, uuid.URL),
     rating: 0,
     fav: false,
-    category: filter
+    category: filter,
+    language: filterLanguage
   }));
 
   const articlesFiltered = totalArticles.filter(item => {
@@ -97,7 +101,7 @@ router.get("/favs", (req, res) => {
   res.render("feed", {
     title: "NewsReader | Favoritos",
     noticias: articlesToShow,
-    isFavsPage: true
+    isFavsPage: true,
   });
 });
 
